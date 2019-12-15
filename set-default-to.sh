@@ -32,13 +32,13 @@ aws_secret_access_key="${temp_creds[1]}"
 aws_session_token="${temp_creds[2]}"
 aws_expiration="${temp_creds[3]}"
 
-# set the default profile in the aws credentials file
+# set the default profile in the aws credentials and config files
 aws configure set default.region $aws_region
 aws configure set aws_access_key_id $aws_access_key_id
 aws configure set aws_secret_access_key $aws_secret_access_key
 aws configure set aws_session_token $aws_session_token
 
-# set the mfa profile in the aws credentials file
+# set the mfa profile in the aws credentials and config files
 aws configure set profile.$mfa_profile.region $aws_region
 aws configure set profile.$mfa_profile.aws_access_key_id $aws_access_key_id
 aws configure set profile.$mfa_profile.aws_secret_access_key $aws_secret_access_key
