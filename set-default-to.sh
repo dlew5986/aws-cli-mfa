@@ -4,9 +4,6 @@
 # https://github.com/neillturner/assume-aws-role-mfa
 #
 
-# this is likely not necessary
-set -e
-
 # input variables
 aws_region=us-east-2
 duration_seconds=14400       # 4 hours
