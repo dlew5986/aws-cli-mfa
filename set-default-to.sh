@@ -18,7 +18,7 @@ read -r -n 7 -t 30 -p "enter 6-digit mfa token code: " mfa_token_code
 # in UTC (to match expiration date/time stamp provided by aws)
 # and in local (to help the humans)
 aws_request_utc=$(date -u +%FT%TZ)
-aws_request_local=$(date +%FT%T local)
+aws_request_local=$(date +%FT%TLocal)
 
 # get session token
 temp_creds=(`aws sts get-session-token \
