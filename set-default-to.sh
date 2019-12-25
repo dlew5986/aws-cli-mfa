@@ -10,10 +10,15 @@ duration_seconds=14400                                # 4 hours
 profile=<PROFILE>                                     # name of the source profile; should be the name of the IAM user
 mfa_arn=<ARN>                                         # aws arn for the mfa enabled on relevant IAM user
 mfa_profile=$profile-mfa                              # will be the name of the profile for the mfa
-aws_request=$(date -u +%FT%TZ)                        # utc date/time stamp of request
 
 # get mfa token code; interactive input
 read -r -n 7 -t 30 -p "enter 6-digit mfa token code: " mfa_token_code
+
+# get date/time stamp of the request
+# in UTC (to match expiration date/time stamp provided by aws)
+# and in local (to help the humans)
+aws_request_utc=$(date -u +%FT%TZ)
+aws_request_local=$(date +%FT%T local)
 
 # get session token
 temp_creds=(`aws sts get-session-token \
@@ -43,9 +48,10 @@ aws configure set profile.$mfa_profile.aws_secret_access_key $aws_secret_access_
 aws configure set profile.$mfa_profile.aws_session_token $aws_session_token
 
 # set expiration file
-echo "requested     $aws_request"                       > expiration
-echo "expiration    $aws_expiration"                   >> expiration
-echo "duration      $((duration_seconds/60/60)) hours" >> expiration
+echo "requested  (local)  $aws_request_local"                 > expiration
+echo "requested  (utc)    $aws_request_utc"                  >> expiration
+echo "expiration (utc)    $aws_expiration"                   >> expiration
+echo "duration            $((duration_seconds/60/60)) hours" >> expiration
 
 # send summary to stdout
 echo ""
@@ -53,8 +59,9 @@ echo "aws access key       $aws_access_key_id"
 echo "aws secret key       $aws_secret_access_key"
 echo "aws session token    $aws_session_token"
 echo ""
-echo "requested            $aws_request"
-echo "expiration           $aws_expiration"
+echo "requested  (local)   $aws_request_local"
+echo "requested  (utc)     $aws_request_utc"
+echo "expiration (utc)     $aws_expiration"
 echo "duration             $((duration_seconds/60/60)) hours"
 echo ""
 echo "The default and $mfa_profile profiles have been updated with MFA-protected temporary credentials."
