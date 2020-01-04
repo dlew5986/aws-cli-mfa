@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #
 # adapted from:
 # https://github.com/neillturner/assume-aws-role-mfa
@@ -10,9 +11,6 @@ source_profile_mfa_arn=${2}            # required: aws arn for the mfa enabled o
 duration_seconds=${3:-14400}           # optional: duration in seconds, default value is 4 hours
 aws_region=${4:-us-east-2}             # optional: name of the aws region, default value is us-east-2
 
-# name of the profile for the ephemeral session token
-ephemeral_profile=$source_profile-ephemeral
-
 # get mfa token code; interactive input
 read -r -n 7 -t 30 -p "enter 6-digit mfa token code: " mfa_token_code
 
@@ -22,11 +20,11 @@ read -r -n 7 -t 30 -p "enter 6-digit mfa token code: " mfa_token_code
 aws_request_utc=$(date -u +%FT%TZ)
 aws_request_local=$(date +%FT%TLocal)
 
-# get ephemeral session token
+# get temporary session token
 temp_creds=(`aws sts get-session-token \
                 --profile "$source_profile" \
                 --serial-number "$source_profile_mfa_arn" \
-                --token-code $mfa_token_code  \
+                --token-code $mfa_token_code \
                 --duration-seconds $duration_seconds \
                 --query "[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken,Credentials.Expiration]" \
                 --output text`)
@@ -43,28 +41,13 @@ aws configure set aws_access_key_id $aws_access_key_id
 aws configure set aws_secret_access_key $aws_secret_access_key
 aws configure set aws_session_token $aws_session_token
 
-# set the mfa profile in the aws credentials and config files
-aws configure set profile.$ephemeral_profile.region $aws_region
-aws configure set profile.$ephemeral_profile.aws_access_key_id $aws_access_key_id
-aws configure set profile.$ephemeral_profile.aws_secret_access_key $aws_secret_access_key
-aws configure set profile.$ephemeral_profile.aws_session_token $aws_session_token
-
-# set expiration file
-echo "requested  (local)  $aws_request_local"                 > ~/.aws/expiration
-echo "requested  (utc)    $aws_request_utc"                  >> ~/.aws/expiration
-echo "expiration (utc)    $aws_expiration"                   >> ~/.aws/expiration
-echo "duration            $((duration_seconds/60/60)) hours" >> ~/.aws/expiration
-
-# send summary to stdout
-echo ""
-echo "aws access key       $aws_access_key_id"
-echo "aws secret key       $aws_secret_access_key"
-echo "aws session token    $aws_session_token"
-echo ""
-echo "requested  (local)   $aws_request_local"
-echo "requested  (utc)     $aws_request_utc"
-echo "expiration (utc)     $aws_expiration"
-echo "duration             $((duration_seconds/60/60)) hours"
-echo ""
-echo "The default and $ephemeral_profile profiles have been updated with MFA-protected temporary credentials."
-echo ""
+# send summary to file
+echo ""                                                       | tee ~/.aws/expiration
+echo "temp session token:"                                    | tee -a ~/.aws/expiration
+echo ""                                                       | tee -a ~/.aws/expiration
+echo "source profile       $source_profile"                   | tee -a ~/.aws/expiration
+echo "requested  (local)   $aws_request_local"                | tee -a ~/.aws/expiration
+echo "requested  (utc)     $aws_request_utc"                  | tee -a ~/.aws/expiration
+echo "expiration (utc)     $aws_expiration"                   | tee -a ~/.aws/expiration
+echo "duration             $((duration_seconds/60/60)) hours" | tee -a ~/.aws/expiration
+echo ""                                                       | tee -a ~/.aws/expiration
