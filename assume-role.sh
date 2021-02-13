@@ -51,6 +51,7 @@ echo ""                                                       | tee ~/.aws/expir
 echo "temp session token:"                                    | tee -a ~/.aws/expiration
 echo ""                                                       | tee -a ~/.aws/expiration
 echo "source profile       $source_profile"                   | tee -a ~/.aws/expiration
+echo "destination role     $role_arn"                         | tee -a ~/.aws/expiration
 echo "requested  (local)   $aws_request_local"                | tee -a ~/.aws/expiration
 echo "requested  (utc)     $aws_request_utc"                  | tee -a ~/.aws/expiration
 echo "expiration (utc)     $aws_expiration"                   | tee -a ~/.aws/expiration
