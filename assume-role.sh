@@ -46,7 +46,7 @@ aws configure set aws_access_key_id $aws_access_key_id
 aws configure set aws_secret_access_key $aws_secret_access_key
 aws configure set aws_session_token $aws_session_token
 
-# send summary to file
+# send summary to both console and file
 echo ""                                                       | tee ~/.aws/expiration
 echo "temp session token:"                                    | tee -a ~/.aws/expiration
 echo ""                                                       | tee -a ~/.aws/expiration
